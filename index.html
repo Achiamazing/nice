@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9-Grid Puzzle Game</title>
+    <style>
+        #puzzle {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 2px;
+        }
+        .puzzle-piece {
+            width: 100px;
+            height: 100px;
+            background-size: 300px 300px;
+            cursor: pointer;
+        }
+        .hidden {
+            visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div id="puzzle"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const puzzle = document.getElementById('puzzle');
+            let pieces = [];
+            let blankIndex = 8; // 假设最后一个格子是空白
+
+            function init() {
+                for (let i = 0; i < 9; i++) {
+                    let piece = document.createElement('div');
+                    piece.id = i;
+                    piece.className = 'puzzle-piece';
+                    piece.style.backgroundImage = "url('https://t14.baidu.com/it/u=1721770648,3041922887&fm=224&app=112&f=JPEG?w=500&h=500.jpg')";
+                    piece.style.backgroundPosition = `-${(i % 3) * 100}px -${Math.floor(i / 3) * 100}px`;
+                    if (i === blankIndex) piece.classList.add('hidden');
+                    piece.addEventListener('click', function() {
+                        movePiece(i);
+                    });
+                    puzzle.appendChild(piece);
+                    pieces.push(piece);
+                }
+
+                shuffle();
+            }
+
+            function shuffle() {
+                for (let i = 0; i < 100; i++) {
+                    let randomIndex = Math.floor(Math.random() * 9);
+                    movePiece(randomIndex);
+                }
+            }
+
+            function movePiece(index) {
+                if (canMove(index)) {
+                    swapPieces(index, blankIndex);
+                    blankIndex = index;
+                    if (isCompleted()) {
+                        showCompleteImage();
+                    }
+                }
+            }
+
+            function canMove(index) {
+                let row = Math.floor(index / 3);
+                let col = index % 3;
+                let blankRow = Math.floor(blankIndex / 3);
+                let blankCol = blankIndex % 3;
+
+                return (row === blankRow && Math.abs(col - blankCol) === 1) ||
+                       (col === blankCol && Math.abs(row - blankRow) === 1);
+            }
+
+            function swapPieces(i, j) {
+                let temp = pieces[i].style.backgroundPosition;
+                pieces[i].style.backgroundPosition = pieces[j].style.backgroundPosition;
+                pieces[j].style.backgroundPosition = temp;
+
+                pieces[i].classList.toggle('hidden');
+                pieces[j].classList.toggle('hidden');
+            }
+
+            function isCompleted() {
+                for (let i = 0; i < pieces.length; i++) {
+                    let row = Math.floor(i / 3);
+                    let col = i % 3;
+                    let expectedPosition = `-${col * 100}px -${row * 100}px`;
+                    if (pieces[i].style.backgroundPosition !== expectedPosition) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function showCompleteImage() {
+                for (let i = 0; i < pieces.length; i++) {
+                    pieces[i].classList.remove('hidden');
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
